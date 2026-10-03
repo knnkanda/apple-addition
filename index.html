@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>りんごのたしざん</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#fff2d6;
+  color:#473629;
+  font-family:system-ui,sans-serif;
+}
+main{
+  max-width:540px;
+  margin:auto;
+  padding:20px 14px 40px;
+}
+h1{text-align:center;color:#9c4d19}
+.subtitle{text-align:center}
+.modes,.numbers{display:grid;gap:8px}
+.modes{grid-template-columns:repeat(3,1fr)}
+.numbers{grid-template-columns:repeat(5,1fr)}
+button{
+  cursor:pointer;
+  border:1px solid #ddd;
+  border-radius:12px;
+  background:white;
+  padding:13px 6px;
+  font-size:19px;
+  font-weight:bold;
+  touch-action:manipulation;
+}
+button:disabled{opacity:.5}
+button.selected{background:#ffce73;border:2px solid #b86b16}
+.primary{
+  background:#f3a93c;
+  color:#40250b;
+  border:0;
+  width:100%;
+  margin-top:12px;
+}
+.card{
+  background:white;
+  border-radius:18px;
+  padding:18px;
+  margin-top:18px;
+}
+.status{display:flex;justify-content:space-between}
+.progress{height:10px;background:#e9d7b9;border-radius:10px;margin-top:14px;overflow:hidden}
+#bar{height:100%;background:#53a66b;width:0}
+.equation{text-align:center;font-size:38px;font-weight:bold;margin:18px 0}
+.apples{display:flex;flex-wrap:wrap;gap:5px;font-size:30px;min-height:44px}
+.apple{display:inline-block}
+.empty{opacity:.3}
+.hint{background:#f3f9ec;padding:12px;border-radius:12px}
+.hint p{font-size:14px}
+.feedback{text-align:center;padding:12px;border-radius:12px;margin-top:12px;background:#e5f6e8}
+.wrong{background:#fff0dd}
+.hidden{display:none}
+#result{text-align:center}
+small{display:block;text-align:center;margin-top:16px}
+</style>
+</head>
+<body>
+<main>
+<h1>🍎 りんごの たしざん</h1>
+<p class="subtitle">10までの かずで あそぼう！</p>
+
+<div class="modes">
+<button data-mode="easy" class="selected">かんたん<br><small>＋1・＋2</small></button>
+<button data-mode="medium">ふつう<br><small>＋1〜4</small></button>
+<button data-mode="hard">ちょうせん<br><small>10まで</small></button>
+</div>
+
+<section class="card">
+<div class="status">
+<strong id="round">もんだい 1 / 10</strong>
+<strong id="score">⭐ 0 てん</strong>
+</div>
+<div class="progress"><div id="bar"></div></div>
+
+<div id="game">
+<p class="subtitle">ぜんぶで なんこ かな？</p>
+<div id="equation" class="equation"></div>
+
+<div id="hint" class="hint">
+<p id="firstLabel"></p>
+<div id="firstApples" class="apples"></div>
+<hr>
+<p id="secondLabel"></p>
+<div id="secondApples" class="apples"></div>
+<button id="add" class="primary">🍎 1こ ふやす</button>
+</div>
+
+<button id="showHint" class="hidden">🍎 りんごで かんがえる</button>
+
+<p>こたえを えらんでね</p>
+<div id="numbers" class="numbers"></div>
+<div id="feedback" class="feedback hidden" aria-live="polite"></div>
+<button id="check" class="primary">こたえあわせ ✓</button>
+<button id="next" class="primary hidden">つぎの もんだい →</button>
+</div>
+
+<div id="result" class="hidden">
+<h2>🎉 おしまい！</h2>
+<h1 id="finalScore"></h1>
+<p id="message"></p>
+<button id="restart" class="primary">もう 10もん あそぶ</button>
+</div>
+</section>
+<small>りんごを ふやして、こたえを タッチ！</small>
+</main>
+
+<script>
+let mode="easy";
+let a=3,b=2,added=0,selected=null;
+let round=1,score=0,solved=false;
+let hintVisible=true;
+
+const $=id=>document.getElementById(id);
+const random=n=>Math.floor(Math.random()*n);
+
+function makeQuestion(){
+  if(mode==="easy") b=1+random(2);
+  else if(mode==="medium") b=1+random(4);
+  else b=1+random(9);
+
+  a=1+random(10-b);
+  added=0;
+  selected=null;
+  solved=false;
+  hintVisible=mode!=="hard";
+  render();
+}
+
+function render(){
+  $("round").textContent=`もんだい ${round} / 10`;
+  $("score").textContent=`⭐ ${score} てん`;
+  $("bar").style.width=`${(round-1)*10}%`;
+  $("equation").textContent=
+    `${a} ＋ ${b} ＝ ${solved?a+b:"？"}`;
+
+  $("hint").classList.toggle("hidden",!hintVisible);
+  $("showHint").classList.toggle("hidden",hintVisible||solved);
+
+  $("firstLabel").textContent=`さいしょに ${a}こ`;
+  $("firstApples").textContent="🍎".repeat(a);
+  $("secondLabel").textContent=
+    `あとから ${b}こ（いま ${added}こ）`;
+
+  $("secondApples").innerHTML="";
+  for(let i=0;i<b;i++){
+    const span=document.createElement("span");
+    span.className="apple"+(i>=added?" empty":"");
+    span.textContent=i<added?"🍎":"○";
+    $("secondApples").append(span);
+  }
+
+  $("add").disabled=added>=b||solved;
+  $("add").textContent=added>=b?
+    "ぜんぶ ふえたよ！":"🍎 1こ ふやす";
+
+  $("numbers").innerHTML="";
+  for(let i=1;i<=10;i++){
+    const button=document.createElement("button");
+    button.textContent=i;
+    button.disabled=solved;
+    if(selected===i)button.classList.add("selected");
+    button.onclick=()=>{
+      selected=i;
+      $("feedback").classList.add("hidden");
+      render();
+    };
+    $("numbers").append(button);
+  }
+
+  $("check").classList.toggle("hidden",solved);
+  $("check").disabled=selected===null;
+  $("next").classList.toggle("hidden",!solved);
+  $("next").textContent=
+    round===10?"けっかを みる":"つぎの もんだい →";
+}
+
+$("add").onclick=()=>{
+  if(added<b){added++;render();}
+};
+
+$("showHint").onclick=()=>{
+  hintVisible=true;
+  render();
+};
+
+$("check").onclick=()=>{
+  if(selected===null)return;
+
+  const feedback=$("feedback");
+  feedback.classList.remove("hidden","wrong");
+
+  if(selected===a+b){
+    solved=true;
+    score++;
+    feedback.textContent="🎉 せいかい！ よくできました！";
+    render();
+    feedback.classList.remove("hidden");
+  }else{
+    feedback.textContent="おしい！ もういちど かぞえてみよう。";
+    feedback.classList.add("wrong");
+    hintVisible=true;
+    render();
+    feedback.classList.remove("hidden");
+  }
+};
+
+$("next").onclick=()=>{
+  if(round===10){
+    $("game").classList.add("hidden");
+    $("result").classList.remove("hidden");
+    $("bar").style.width="100%";
+    $("finalScore").textContent=`${score} / 10 てん`;
+    $("message").textContent=score===10?
+      "ぜんぶ せいかい！ すごい！":
+      "さいごまで がんばったね！";
+  }else{
+    round++;
+    makeQuestion();
+  }
+};
+
+function restart(){
+  round=1;
+  score=0;
+  $("game").classList.remove("hidden");
+  $("result").classList.add("hidden");
+  $("feedback").classList.add("hidden");
+  makeQuestion();
+}
+
+document.querySelectorAll("[data-mode]").forEach(button=>{
+  button.onclick=()=>{
+    mode=button.dataset.mode;
+    document.querySelectorAll("[data-mode]").forEach(x=>
+      x.classList.toggle("selected",x===button)
+    );
+    restart();
+  };
+});
+
+$("restart").onclick=restart;
+render();
+</script>
+</body>
+</html>
