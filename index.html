@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<!-- version: v1.4 five-apple groups, numbered apples, sound toggle, random celebration -->
+<!-- version: v1.5 ten-frame apple positions, persistent five-groups, sound toggle, random celebration -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="りんごを1こずつ増やして学ぶ、答えが10までの足し算ゲーム。">
 <title>りんごのたしざん</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#fff2d6;color:#473629;font-family:system-ui,sans-serif}main{max-width:540px;margin:auto;padding:20px 14px 40px}h1{text-align:center;color:#9c4d19;font-size:clamp(24px,6vw,32px)}.subtitle{text-align:center}.modes,.numbers{display:grid;gap:8px}.modes{grid-template-columns:repeat(3,1fr)}.numbers{grid-template-columns:repeat(5,1fr)}button{cursor:pointer;border:1px solid #ddd;border-radius:12px;background:white;padding:13px 6px;font-size:19px;font-weight:bold;touch-action:manipulation;min-height:48px;color:inherit}button:disabled{opacity:.5;cursor:default}button:focus-visible{outline:3px solid #237848;outline-offset:3px}button.selected{background:#ffce73;border:2px solid #b86b16}.primary{background:#f3a93c;color:#40250b;border:0;width:100%;margin-top:12px}.sound{display:block;width:100%;margin:12px 0 0;background:#fffaf0;border-color:#e0bd78;color:#6e4312}.sound[aria-pressed="true"]{background:#dff7e4;border-color:#50a56d;color:#235a34}.card{background:white;border-radius:18px;padding:18px;margin-top:18px}.status{display:flex;justify-content:space-between}.progress{height:10px;background:#e9d7b9;border-radius:10px;margin-top:14px;overflow:hidden}#bar{height:100%;background:#53a66b;width:0}.equation{text-align:center;font-size:38px;font-weight:bold;margin:18px 0}.apples{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-height:52px}.appleGroup{display:flex;gap:5px;align-items:center;background:#fffaf0;border:2px dashed #e7bf80;border-radius:16px;padding:6px}.appleTile{position:relative;display:grid;place-items:center;width:36px;height:36px;border-radius:52% 48% 50% 50%;background:#e94034;color:white;font-size:16px;font-weight:900;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,.35);box-shadow:inset -4px -6px 0 rgba(140,0,0,.12),0 2px 4px rgba(71,54,41,.18)}.appleTile::before{content:"";position:absolute;top:-6px;right:7px;width:15px;height:9px;background:#4caa52;border-radius:12px 2px 12px 2px;transform:rotate(-25deg)}.appleTile.empty{background:#fff5e5;border:2px dashed #d2b184;color:transparent;box-shadow:none}.appleTile.empty::before{display:none}.hint{background:#f3f9ec;padding:12px;border-radius:12px}.hint p{font-size:14px}.feedback{text-align:center;padding:12px;border-radius:12px;margin-top:12px;background:#e5f6e8}.wrong{background:#fff0dd}.hidden{display:none}#result{text-align:center}small{display:block;text-align:center;margin-top:12px;font-size:13px}
+*{box-sizing:border-box}body{margin:0;background:#fff2d6;color:#473629;font-family:system-ui,sans-serif}main{max-width:540px;margin:auto;padding:20px 14px 40px}h1{text-align:center;color:#9c4d19;font-size:clamp(24px,6vw,32px)}.subtitle{text-align:center}.modes,.numbers{display:grid;gap:8px}.modes{grid-template-columns:repeat(3,1fr)}.numbers{grid-template-columns:repeat(5,1fr)}button{cursor:pointer;border:1px solid #ddd;border-radius:12px;background:white;padding:13px 6px;font-size:19px;font-weight:bold;touch-action:manipulation;min-height:48px;color:inherit}button:disabled{opacity:.5;cursor:default}button:focus-visible{outline:3px solid #237848;outline-offset:3px}button.selected{background:#ffce73;border:2px solid #b86b16}.primary{background:#f3a93c;color:#40250b;border:0;width:100%;margin-top:12px}.sound{display:block;width:100%;margin:12px 0 0;background:#fffaf0;border-color:#e0bd78;color:#6e4312}.sound[aria-pressed="true"]{background:#dff7e4;border-color:#50a56d;color:#235a34}.card{background:white;border-radius:18px;padding:18px;margin-top:18px}.status{display:flex;justify-content:space-between}.progress{height:10px;background:#e9d7b9;border-radius:10px;margin-top:14px;overflow:hidden}#bar{height:100%;background:#53a66b;width:0}.equation{text-align:center;font-size:38px;font-weight:bold;margin:18px 0}.apples{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-height:52px}.appleGroup{display:flex;gap:5px;align-items:center;background:#fffaf0;border:2px dashed #e7bf80;border-radius:16px;padding:6px}.appleTile{position:relative;display:grid;place-items:center;width:36px;height:36px;border-radius:52% 48% 50% 50%;background:#e94034;color:white;font-size:16px;font-weight:900;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,.35);box-shadow:inset -4px -6px 0 rgba(140,0,0,.12),0 2px 4px rgba(71,54,41,.18)}.appleTile::before{content:"";position:absolute;top:-6px;right:7px;width:15px;height:9px;background:#4caa52;border-radius:12px 2px 12px 2px;transform:rotate(-25deg)}.appleTile.added{background:#f3a93c;color:#40250b;text-shadow:none}.appleTile.planned,.appleTile.blank{background:#fff5e5;border:2px dashed #d2b184;color:transparent;box-shadow:none;text-shadow:none}.appleTile.planned{border-color:#f3a93c}.appleTile.blank{opacity:.45}.appleTile.planned::before,.appleTile.blank::before{display:none}.hint{background:#f3f9ec;padding:12px;border-radius:12px}.hint p{font-size:14px}.feedback{text-align:center;padding:12px;border-radius:12px;margin-top:12px;background:#e5f6e8}.wrong{background:#fff0dd}.hidden{display:none}#result{text-align:center}small{display:block;text-align:center;margin-top:12px;font-size:13px}
 #celebration{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:10}.burst{position:absolute;left:var(--x);top:var(--y)}.spark{position:absolute;width:11px;height:11px;border-radius:999px;background:var(--color);box-shadow:0 0 16px var(--color);animation:fireworkSpark .9s ease-out forwards}.spark::after{content:"";display:block;width:5px;height:18px;border-radius:999px;background:inherit;transform:translate(3px,7px)}@keyframes fireworkSpark{0%{transform:translate(-50%,-50%) scale(.2);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.9);opacity:0}}.confetti{position:absolute;top:-30px;left:var(--x);font-size:28px;animation:confettiFall var(--duration) linear forwards}.paper{display:inline-block;transform:rotate(var(--rotate));animation:paperSpin .55s linear infinite}@keyframes confettiFall{0%{transform:translateY(-30px)}100%{transform:translateY(110vh)}}@keyframes paperSpin{to{transform:rotate(calc(var(--rotate) + 360deg))}}.cracker{position:absolute;bottom:22px;font-size:48px;animation:crackerJump 1s ease-out forwards}.cracker.left{left:16px;--flip:scaleX(1)}.cracker.right{right:16px;--flip:scaleX(-1)}@keyframes crackerJump{0%{transform:var(--flip) translateY(40px);opacity:0}25%{transform:var(--flip) translateY(0);opacity:1}100%{transform:var(--flip) translateY(10px);opacity:0}}.rocket{position:absolute;left:var(--x);bottom:-70px;font-size:54px;filter:drop-shadow(0 0 10px #ff8b1f);animation:rocketFly 1.35s cubic-bezier(.16,.84,.27,1) forwards}.rocket::after{content:"✨";position:absolute;left:12px;top:54px;font-size:28px;animation:trail .25s ease-in-out infinite alternate}.floating-star{position:absolute;left:var(--x);top:var(--y);font-size:26px;animation:starPop 1.2s ease-out forwards}@keyframes rocketFly{0%{transform:translateY(0) rotate(-12deg);opacity:0}10%{opacity:1}100%{transform:translateY(-112vh) rotate(10deg);opacity:0}}@keyframes trail{to{transform:translateY(18px) scale(1.3);opacity:.35}}@keyframes starPop{0%{transform:scale(.2) rotate(0);opacity:0}35%{opacity:1}100%{transform:translateY(-80px) scale(1.5) rotate(220deg);opacity:0}}@media (prefers-reduced-motion:reduce){#celebration *{animation-duration:.01ms!important}}
 </style>
 </head>
@@ -27,8 +27,8 @@
 <p class="subtitle">ぜんぶで なんこ かな？</p>
 <div id="equation" class="equation"></div>
 <div id="hint" class="hint">
-<p id="firstLabel"></p><div id="firstApples" class="apples"></div><hr>
-<p id="secondLabel"></p><div id="secondApples" class="apples"></div>
+<p id="firstLabel"></p>
+<p id="secondLabel"></p><div id="allApples" class="apples"></div>
 <button id="add" class="primary">🍎 1こ ふやす</button>
 </div>
 <button id="showHint" class="hidden">🍎 りんごで かんがえる</button>
@@ -149,25 +149,27 @@ function playWrongSound(){
   playTone(180,0,.22,'sawtooth',.1);
   playTone(120,.12,.25,'sawtooth',.09);
 }
-function makeAppleTile(number,visible){
+function makeAppleTile(number,state){
   const apple=document.createElement('span');
-  apple.className='appleTile'+(visible?'':' empty');
+  const visible=state==='start'||state==='added';
+  apple.className='appleTile '+state;
   apple.textContent=visible?number:'';
-  apple.setAttribute('aria-label',visible?`${number}こめのりんご`:'まだふえていないりんご');
+  apple.setAttribute('aria-label',visible?`${number}こめのりんご`:state==='planned'?`${number}こめの場所`:'5こまとまりを保つ空白');
   return apple;
 }
-function renderAppleGroups(id,total,visible,startNumber=1){
+function renderAppleLine(id,startCount,addCount,addedCount){
   const container=$(id);
   container.replaceChildren();
   let group=null;
-  for(let i=0;i<total;i++){
-    if(i%5===0){
+  for(let number=1;number<=10;number++){
+    if((number-1)%5===0){
       group=document.createElement('div');
       group.className='appleGroup';
-      group.setAttribute('aria-label',`${Math.floor(i/5)+1}つめのまとまり`);
+      group.setAttribute('aria-label',number===1?'1から5のまとまり':'6から10のまとまり');
       container.append(group);
     }
-    group.append(makeAppleTile(startNumber+i,i<visible));
+    const state=number<=startCount?'start':number<=startCount+addedCount?'added':number<=startCount+addCount?'planned':'blank';
+    group.append(makeAppleTile(number,state));
   }
 }
 function makeQuestion(){
@@ -183,10 +185,9 @@ function render(){
   $('equation').textContent=`${a} ＋ ${b} ＝ ${solved?a+b:'？'}`;
   $('hint').classList.toggle('hidden',!hintVisible);
   $('showHint').classList.toggle('hidden',hintVisible||solved);
-  $('firstLabel').textContent=`さいしょに ${a}こ`;
-  renderAppleGroups('firstApples',a,a,1);
+  $('firstLabel').textContent=`さいしょに ${a}こ。あとからふえるりんごは、うしろにつづくよ`;
   $('secondLabel').textContent=`あとから ${b}こ（いま ${added}こ）`;
-  renderAppleGroups('secondApples',b,added,a+1);
+  renderAppleLine('allApples',a,b,added);
   $('add').disabled=added>=b||solved;
   $('add').textContent=added>=b?'ぜんぶ ふえたよ！':'🍎 1こ ふやす';
   $('numbers').replaceChildren();
